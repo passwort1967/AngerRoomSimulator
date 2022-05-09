@@ -11,31 +11,84 @@ public enum Material
 
 public class Destructable : MonoBehaviour
 {
+    //Public Fields
     public GameObject destroyedObjectPefab;
+    public GameObject particleSystems;
     public Material material = Material.WOOD;
-    public int destructionForce = 4;
+    
     public bool removeFragments = true;
     public float minFragmentLiveTime = 3;
     public float maxFragmentLiveTime = 8;
+
+    //Private Fields
     private float destructionTime = 1;
+    private float destructionForce = 0;
+    private ParticleSystem particleSystem;
 
 
 
     //Unity Methods
+    private void Start()
+    {
+        switch (material)
+        {
+            case Material.GLASS:
+                {
+                    destructionForce = 2.0f;
+                    particleSystem = particleSystems.transform.Find("Glass").gameObject.GetComponent<ParticleSystem>();
+                    break;
+                }
+            case Material.WOOD:
+                {
+                    destructionForce = 3.0f;
+                    //particleSystem = particleSystems.transform.Find("WOOD").GetComponent<ParticleSystem>();
+                    break;
+                }
+            case Material.STONE:
+                {
+                    destructionForce = 4.0f;
+                    //particleSystem = particleSystems.transform.Find("STONE").GetComponent<ParticleSystem>();
+                    break;
+                }
+            case Material.STEAL:
+                {
+                    destructionForce = 5.0f;
+                    //particleSystem = particleSystems.transform.Find("STEAL").GetComponent<ParticleSystem>();
+                    break;
+                }
+        }
+
+        var main = particleSystem.main;
+        main.startColor = gameObject.GetComponent<MeshRenderer>().material.color;
+      
+
+    }
+
+    private void Update()
+    {
+       
+        
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.relativeVelocity.magnitude > destructionForce)
         {
-            destroy();
+            Destroy(collision);
         }
 
     }
 
-    //User Methods
-    void destroy()
+
+
+    //User Methode
+    private void Destroy(Collision collision)
     {
         GameObject destroyedObject = Instantiate(destroyedObjectPefab, transform.position, transform.rotation);
         Destroy(gameObject);
+
+        //Particle System
+        RenderParticles(collision);
 
         if (!removeFragments) return;
 
@@ -49,12 +102,18 @@ public class Destructable : MonoBehaviour
         }
     }
 
-    IEnumerator RemoveObject(GameObject obj, float liveTime)
+    private IEnumerator RemoveObject(GameObject obj, float liveTime)
     {
         yield return new WaitForSeconds(liveTime);
         Destroy(obj.GetComponent<Collider>());
         yield return new WaitForSeconds(destructionTime);
         Destroy(obj);
     }
-    
+
+    private void RenderParticles(Collision collision)
+    {
+        particleSystem.transform.position = collision.contacts[0].point;
+        particleSystem.Play();
+    }
+
 }
