@@ -13,7 +13,6 @@ public class Destructable : MonoBehaviour
 {
     //Public Fields
     public GameObject destroyedObjectPefab;
-    public GameObject particleSystems;
     public Material material = Material.WOOD;
     
     public bool removeFragments = true;
@@ -23,42 +22,44 @@ public class Destructable : MonoBehaviour
     //Private Fields
     private float destructionTime = 1;
     private float destructionForce = 0;
-    private ParticleSystem particleSystem;
-
-
+    private ParticleSystem ps;
+    
 
     //Unity Methods
     private void Start()
     {
+        //Find Particle Systems
+        GameObject particleSystems = GameObject.Find("Particle_Systems").gameObject;
+
         switch (material)
         {
             case Material.GLASS:
                 {
                     destructionForce = 2.0f;
-                    particleSystem = particleSystems.transform.Find("Glass").gameObject.GetComponent<ParticleSystem>();
+                    ps = particleSystems.transform.Find("Glass").gameObject.GetComponent<ParticleSystem>();
                     break;
                 }
             case Material.WOOD:
                 {
                     destructionForce = 3.0f;
-                    //particleSystem = particleSystems.transform.Find("WOOD").GetComponent<ParticleSystem>();
+                    ps = particleSystems.transform.Find("WOOD").GetComponent<ParticleSystem>();
                     break;
                 }
             case Material.STONE:
                 {
                     destructionForce = 4.0f;
-                    //particleSystem = particleSystems.transform.Find("STONE").GetComponent<ParticleSystem>();
+                    ps = particleSystems.transform.Find("STONE").GetComponent<ParticleSystem>();
                     break;
                 }
             case Material.STEAL:
                 {
                     destructionForce = 5.0f;
-                    //particleSystem = particleSystems.transform.Find("STEAL").GetComponent<ParticleSystem>();
+                    ps = particleSystems.transform.Find("STEAL").GetComponent<ParticleSystem>();
                     break;
                 }
         }
 
-        var main = particleSystem.main;
+        var main = ps.main;
         main.startColor = gameObject.GetComponent<MeshRenderer>().material.color;
       
 
@@ -81,7 +82,7 @@ public class Destructable : MonoBehaviour
 
 
 
-    //User Methode
+    //Helper Methode
     private void Destroy(Collision collision)
     {
         GameObject destroyedObject = Instantiate(destroyedObjectPefab, transform.position, transform.rotation);
@@ -112,8 +113,8 @@ public class Destructable : MonoBehaviour
 
     private void RenderParticles(Collision collision)
     {
-        particleSystem.transform.position = collision.contacts[0].point;
-        particleSystem.Play();
+        ps.transform.position = collision.contacts[0].point;
+        ps.Play();
     }
 
 }
